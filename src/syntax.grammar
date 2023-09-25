@@ -1,0 +1,255 @@
+@precedence {
+    return,
+    comment,
+    call,
+    exprwithblock,
+    prefix @right,
+    infix @left,
+    assign @right
+}
+
+@top Program {
+    (item)*
+}
+
+item {
+    FunctionDefinition | SetzeStmt | BeantrageStmt
+}
+
+FunctionDefinition { kw<"funk"> Ident Parameters ( kw<"ergibt"> Type )? Block }
+
+Parameters {
+    "(" (Type Ident (SlashDelimeter Type Ident)*)? ")"
+}
+
+Block {
+  "{" Statement* Expression? "}"
+}
+
+BeantrageStmt {
+    kw<"beantrage"> BeantrageFn kw<"von"> BeantrageModule ";"
+}
+
+BeantrageFn {
+    Ident
+}
+
+BeantrageModule {
+    Ident
+}
+
+Statement {
+    UeberweiseStmt |
+    AbbrechenStmt |
+    WeitermachenStmt |
+    SetzeStmt |
+    AendereStmt |
+    SolangeStmt |
+    ExprStmt
+}
+
+SetzeStmt {
+    kw<"setze"> Type Ident kw<"auf"> Expression ";"
+}
+
+AendereStmt {
+    kw<"ändere"> Ident kw<"auf"> Expression ";"
+}
+
+SolangeStmt {
+    kw<"solange"> Expression Block ";"?
+}
+
+ExprStmt {
+    (ExprWithoutBlock ";") |
+    (!exprwithblock ExprWithBlock ";"?)
+}
+
+Expression {
+    ExprWithBlock |
+    ExprWithoutBlock
+}
+
+ExprWithBlock {
+    Block |
+    IfExpr
+}
+
+ExprWithoutBlock {
+    Number |
+    Bool |
+    Char |
+    List |
+    String |
+    VariableName |
+    PrefixExpr |
+    InfixExpr |
+    AssignExpr |
+    CallExpr |
+    CastExpr |
+    NestedExpr
+}
+
+List {
+    "[" (Expression ( SlashDelimeter Expression )* ","?)? "]"
+}
+
+NestedExpr {
+    "(" Expression ")"
+}
+
+PrefixExpr {
+    !prefix PrefixOp Expression
+}
+
+AssignExpr {
+    Ident !assign AssignOp Expression
+}
+
+CallExpr {
+    VariableName !call "(" ArgumentList? ")"
+}
+
+CastExpr {
+    Expression kw<"as"> Type
+}
+
+Type {
+  @specialize<Ident, "Zahl" | "Fließkommazahl" | "Wahrheitswert" | "Zeichen" | "Zeichenkette" | "Nichts"> @specialize<Ident, "Liste"> kw<"von"> Type
+}
+
+ArgumentList {
+    Expression ( SlashDelimeter Expression )* ","?
+}
+
+InfixExpr {
+    Expression !infix InfixOp Expression
+}
+
+IfExpr {
+  kw<"falls"> Expression Block (kw<"sonst"> (IfExpr | Block))?
+}
+
+Bool {
+  @specialize[@name=Bool]<Ident, "ja" | "nein">
+}
+
+UeberweiseStmt {
+  !return kw<"überweise"> Expression? ";"
+}
+
+AbbrechenStmt {
+  kw<"abbrechen"> ";"
+}
+
+WeitermachenStmt {
+  kw<"weitermachen"> ";"
+}
+
+@skip { token_1 | LineComment | BlockComment }
+
+@tokens {
+    token_1 {
+        " " | "\n" | "\t" | "\r"
+    }
+
+    LineComment {
+        "//" ![\n]*
+    }
+
+    BlockComment { "/*" blockCommentRest }
+
+    blockCommentRest { ![*] blockCommentRest | "*" blockCommentAfterStar }
+
+    blockCommentAfterStar { "/" | "*" blockCommentAfterStar | ![/*] blockCommentRest }
+
+    InfixOp {
+        "+" |
+        "-" |
+        "*" |
+        ":" |
+        "%" |
+        "**" |
+        "==" |
+        "!=" |
+        "<" |
+        ">" |
+        "<=" |
+        ">=" |
+        "<<" |
+        ">>" |
+        "|" |
+        "&" |
+        "^" |
+        "||" |
+        "&&"
+    }
+
+    AssignOp {
+        "=" |
+        "+=" |
+        "-=" |
+        "*=" |
+        "/=" |
+        "%=" |
+        "**=" |
+        "<<=" |
+        ">>=" |
+        "|=" |
+        "&=" |
+        "^="
+    }
+
+    SlashDelimeter {
+     "/"
+    }
+
+    PrefixOp {
+        "-"
+        | "!"
+    }
+
+    Number {
+        $[0-9]+ ( ("," $[0-9]+)
+        | "F" )?
+        | '0x' hex (hex | "_")*
+    }
+
+    word {
+        ($[a-zA-Z_] | "ü" | "ä" | "ö" | "ß") ($[a-zA-Z0-9_] | "ü" | "ä" | "ö" | "ß")* }
+
+    hex {
+        $[0-9]
+        | 'A'
+        | 'B'
+        | 'C'
+        | 'D'
+        | 'E'
+        | 'F'
+        | 'a'
+        | 'b'
+        | 'c'
+        | 'd'
+        | 'e'
+        | 'f'
+    }
+
+    Ident { word }
+
+    Char {
+        "'" (![\\'] | "\\" _)* "'"?
+    }
+
+    String {
+        '"' (![\\"] | "\\" _)* '"'?
+    }
+
+    "." "," ";"
+    "(" ")" "{" "}" "[" "]"
+
+    @precedence { LineComment, SlashDelimeter, AssignOp, PrefixOp, InfixOp }
+}
+
+kw<term> { @specialize[@name={term}]<Ident, term> }
+BuiltinFunc { @specialize[@name=BuiltinFunc]<Ident, "exit" > }
+VariableName { BuiltinFunc | Ident }
