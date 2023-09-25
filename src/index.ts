@@ -10,7 +10,7 @@ import {
 import { styleTags, tags as t } from '@lezer/highlight'
 import { parser } from './syntax.grammar'
 
-export const rushLanguage = LRLanguage.define({
+export const HPILanguage = LRLanguage.define({
     parser: parser.configure({
         props: [
             indentNodeProp.add({
@@ -53,7 +53,7 @@ export const rushLanguage = LRLanguage.define({
     },
 })
 
-export const rushCompletion = rushLanguage.data.of({
+export const HPICompletion = HPILanguage.data.of({
     autocomplete: completeFromList([
         { label: 'funk', type: 'keyword' },
         { label: 'setze', type: 'keyword' },
@@ -66,6 +66,6 @@ export const rushCompletion = rushLanguage.data.of({
     ]),
 })
 
-export function rush() {
-    return new LanguageSupport(rushLanguage, [rushCompletion])
+export function HPI() {
+    return new LanguageSupport(HPILanguage, [HPICompletion])
 }
