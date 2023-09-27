@@ -111,11 +111,17 @@ CallExpr {
 }
 
 CastExpr {
-    Expression kw<"as"> Type
+    Expression kw<"als"> Type
 }
 
 Type {
-  @specialize<Ident, "Zahl" | "Fließkommazahl" | "Wahrheitswert" | "Zeichen" | "Zeichenkette" | "Nichts"> @specialize<Ident, "Liste"> kw<"von"> Type
+  @specialize<Ident, "Zahl">
+  | @specialize<Ident, "Fließkommazahl">
+  | @specialize<Ident, "Wahrheitswert">
+  | @specialize<Ident, "Zeichen">
+  | @specialize<Ident, "Zeichenkette">
+  | @specialize<Ident, "Nichts">
+  | @specialize<Ident, "Liste"> kw<"von"> Type
 }
 
 ArgumentList {
@@ -131,7 +137,8 @@ IfExpr {
 }
 
 Bool {
-  @specialize[@name=Bool]<Ident, "ja" | "nein">
+  @specialize[@name=Bool]<Ident, "ja">
+  | @specialize[@name=Bool]<Ident, "nein">
 }
 
 UeberweiseStmt {
@@ -210,8 +217,7 @@ WeitermachenStmt {
     }
 
     Number {
-        $[0-9]+ ( ("," $[0-9]+)
-        | "F" )?
+        $[0-9] ($[0-9] | "_")* ( ("," ($[0-9] | "_")+) | "F" )?
         | '0x' hex (hex | "_")*
     }
 

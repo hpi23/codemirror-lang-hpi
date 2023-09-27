@@ -1,3 +1,4 @@
+import { parser } from './syntax.grammar'
 import { completeFromList } from '@codemirror/autocomplete'
 import {
     delimitedIndent,
@@ -8,7 +9,6 @@ import {
     LRLanguage,
 } from '@codemirror/language'
 import { styleTags, tags as t } from '@lezer/highlight'
-import { parser } from './syntax.grammar'
 
 export const HPILanguage = LRLanguage.define({
     parser: parser.configure({
