@@ -1,6 +1,6 @@
 {
   "name": "codemirror-lang-hpi",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "HPI language support for CodeMirror",
   "author": "MikMuellerDev",
   "license": "GPL-3.0-only",
